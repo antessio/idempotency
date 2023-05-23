@@ -2,20 +2,20 @@ package antessio.idempotency;
 
 import java.util.Optional;
 
-public class IdempotencyKey <K, T>{
-    private K key;
+public class IdempotencyKey <T>{
+    private String key;
     private T target;
 
-    public IdempotencyKey(K key, T target) {
+    public IdempotencyKey(String key, T target) {
         this.key = key;
         this.target = target;
     }
 
-    public IdempotencyKey(K key) {
+    public IdempotencyKey(String key) {
         this.key = key;
     }
 
-    public K getKey() {
+    public String getKey() {
         return key;
     }
 

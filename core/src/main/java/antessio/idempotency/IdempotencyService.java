@@ -2,11 +2,11 @@ package antessio.idempotency;
 
 import java.util.function.Supplier;
 
-public interface IdempotencyService<K, T> {
+public interface IdempotencyService<T> {
 
 
     T executeWithIdempotencyKey(
-            Supplier<K> idempotencyKeyExtractor,
+            Supplier<String> idempotencyKeyExtractor,
             Supplier<T> executor);
 
 

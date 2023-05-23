@@ -12,6 +12,7 @@
     <name>idempotency</name>
     <modules>
         <module>core</module>
+        <module>postgres</module>
     </modules>
 
     <properties>

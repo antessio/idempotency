@@ -2,11 +2,11 @@ package antessio.idempotency;
 
 import java.util.Optional;
 
-public interface IdempotencyKeyRepository <K, T>{
+public interface IdempotencyKeyRepository < T>{
 
-    Optional<IdempotencyKey<K,T>> loadByKey(K key);
-    void addKey(K key);
+    Optional<IdempotencyKey<T>> loadByKey(String key);
+    void addKey(String key);
 
-    void updateTarget(K key, T target);
+    void updateTarget(String key, T target);
 
 }

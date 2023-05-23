@@ -2,20 +2,20 @@ package antessio.idempotency;
 
 import java.util.function.Supplier;
 
-public class IdempotencyServiceBaseImpl<K, T> implements IdempotencyService<K, T> {
+public class IdempotencyServiceBaseImpl<T> implements IdempotencyService<T> {
 
-    private IdempotencyKeyRepository<K, T> idempotencyKeyRepository;
+    private IdempotencyKeyRepository<T> idempotencyKeyRepository;
 
-    public IdempotencyServiceBaseImpl(IdempotencyKeyRepository<K, T> idempotencyKeyRepository) {
+    public IdempotencyServiceBaseImpl(IdempotencyKeyRepository<T> idempotencyKeyRepository) {
         this.idempotencyKeyRepository = idempotencyKeyRepository;
     }
 
     @Override
     public T executeWithIdempotencyKey(
-            Supplier<K> idempotencyKeyExtractor,
+            Supplier<String> idempotencyKeyExtractor,
             Supplier<T> executor) {
 
-        K key = idempotencyKeyExtractor.get();
+        String key = idempotencyKeyExtractor.get();
         return idempotencyKeyRepository.loadByKey(key)
                                        .map(idempotencyKey -> idempotencyKey
                                                .getTarget()
@@ -24,7 +24,7 @@ public class IdempotencyServiceBaseImpl<K, T> implements IdempotencyService<K, T
 
     }
 
-    private T executeAndStoreIdempotencyKey(Supplier<T> executor, K key) {
+    private T executeAndStoreIdempotencyKey(Supplier<T> executor, String key) {
         idempotencyKeyRepository.addKey(key);
         T target = executor.get();
         idempotencyKeyRepository.updateTarget(key, target);

@@ -19,9 +19,9 @@ import org.junit.jupiter.api.Test;
 class IdempotencyServiceBaseImplTest {
 
 
-    private IdempotencyKeyRepository<String, StubTarget> repository;
+    private IdempotencyKeyRepository<StubTarget> repository;
 
-    private IdempotencyService<String, StubTarget> idempotencyService;
+    private IdempotencyService<StubTarget> idempotencyService;
 
     @BeforeEach
     void setUp() {
