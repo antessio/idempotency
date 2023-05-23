@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -20,13 +21,15 @@ class IdempotencyServiceBaseImplTest {
 
 
     private IdempotencyKeyRepository<StubTarget> repository;
+    private Clock clock;
 
     private IdempotencyService<StubTarget> idempotencyService;
 
     @BeforeEach
     void setUp() {
         repository = mock(IdempotencyKeyRepository.class);
-        idempotencyService = new IdempotencyServiceBaseImpl<>(repository);
+        clock = mock(Clock.class);
+        idempotencyService = new IdempotencyServiceBaseImpl<>(clock, repository);
     }
 
 

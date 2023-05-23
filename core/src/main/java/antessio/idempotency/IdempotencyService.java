@@ -1,5 +1,6 @@
 package antessio.idempotency;
 
+import java.time.Duration;
 import java.util.function.Supplier;
 
 public interface IdempotencyService<T> {
@@ -9,5 +10,7 @@ public interface IdempotencyService<T> {
             Supplier<String> idempotencyKeyExtractor,
             Supplier<T> executor);
 
+
+    void cleanupExpired(Duration idempotencyKeyDuration);
 
 }
