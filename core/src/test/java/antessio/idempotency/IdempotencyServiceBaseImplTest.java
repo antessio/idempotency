@@ -83,7 +83,7 @@ class IdempotencyServiceBaseImplTest {
         when(clock.instant()).thenReturn(now);
         IdempotencyKey existingToken = new IdempotencyKey(
                 idempotencyKey,
-                oldValue,
+                null,
                 now.minus(48, ChronoUnit.HOURS));
         repository.getStore().put(idempotencyKey, existingToken);
         // when

@@ -26,25 +26,34 @@ public class IdempotencyServiceImpl implements IdempotencyService {
             Supplier<ENTITY> create,
             Function<ENTITY, String> entityToId) {
         Instant now = clock.instant();
+        Supplier<ENTITY> createEntityAndStoreIdempotencyKey = () -> {
+            idempotencyTokenRepository.createIdempotencyKey(token, now.plus(tokenDuration));
+            try {
+                ENTITY entity = create.get();
+                idempotencyTokenRepository.updateIdempotencyKey(
+                        token,
+                        entityToId.apply(entity));
+                return entity;
+            } catch (Exception e) {
+                idempotencyTokenRepository.cleanupIdempotencyKey(token);
+                throw e;
+            }
+        };
         return idempotencyTokenRepository.getIdempotencyKey(token)
-                                         .filter(idempotencyKey -> now.isBefore(idempotencyKey.getExpiresAt()))
-                                         .flatMap(idempotencyKey -> idempotencyKey.getEntityId()
-                                                            .map(retrieve)
-                                                            .orElseThrow(() -> new IdempotencyException(IdempotencyException.ErrorCode.IN_PROGRESS_REQUEST)))
-
-                                         .orElseGet(() -> {
-                                             idempotencyTokenRepository.createIdempotencyKey(token, now.plus(tokenDuration));
-                                             try {
-                                                 ENTITY entity = create.get();
-                                                 idempotencyTokenRepository.updateIdempotencyKey(
-                                                                 token,
-                                                                 entityToId.apply(entity));
-                                                 return entity;
-                                             } catch (Exception e) {
+                                         .map(idempotencyKey -> {
+                                             if (now.isBefore(idempotencyKey.getExpiresAt())) {
+                                                 return idempotencyKey.getEntityId()
+                                                                      .flatMap(retrieve)
+                                                                      .orElseThrow(() -> new IdempotencyException(IdempotencyException.ErrorCode.IN_PROGRESS_REQUEST));
+                                             } else {
+                                                 if (idempotencyKey.getEntityId().isPresent()) {
+                                                     throw new IllegalArgumentException("cannot override existing token");
+                                                 }
                                                  idempotencyTokenRepository.cleanupIdempotencyKey(token);
-                                                 throw e;
+                                                 return createEntityAndStoreIdempotencyKey.get();
                                              }
-                                         });
+                                         })
+                                         .orElseGet(createEntityAndStoreIdempotencyKey);
     }
 
 }
