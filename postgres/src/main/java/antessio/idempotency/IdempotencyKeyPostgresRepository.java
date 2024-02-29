@@ -1,51 +1,35 @@
 package antessio.idempotency;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
-public class IdempotencyKeyPostgresRepository<T> implements IdempotencyKeyRepository<T> {
+public class IdempotencyKeyPostgresRepository implements IdempotencyTokenRepository {
 
-    private final IdempotencyKeyDao<T> idempotencyKeyDao;
+    private final IdempotencyKeyDao idempotencyKeyDao;
 
-    public IdempotencyKeyPostgresRepository(IdempotencyKeyDao<T> idempotencyKeyDao) {
+    public IdempotencyKeyPostgresRepository(IdempotencyKeyDao idempotencyKeyDao) {
         this.idempotencyKeyDao = idempotencyKeyDao;
     }
 
+
     @Override
-    public Optional<IdempotencyKey<T>> loadByKey(String key) {
+    public Optional<IdempotencyKey> getIdempotencyKey(String key) {
         return Optional.ofNullable(idempotencyKeyDao.findById(key));
     }
 
-
     @Override
-    public void addKey(String key) {
-        int affectedRows = idempotencyKeyDao.insert(key);
-        if (affectedRows == 0) {
-            throw new RuntimeException("no rows inserted");
-        }
+    public void updateIdempotencyKey(String key, String entityId) {
+        idempotencyKeyDao.update(key, entityId);
     }
 
     @Override
-    public void updateTarget(String key, T target) {
-        idempotencyKeyDao.update(key, target);
+    public void createIdempotencyKey(String idempotencyKey, Instant expiresAt) {
+        idempotencyKeyDao.insert(idempotencyKey, expiresAt);
     }
 
     @Override
-    public Stream<IdempotencyKey<T>> getCreatedBefore(Instant before) {
-        return Stream.iterate(
-                             idempotencyKeyDao.findWhereCreationDateBefore(before, 20),
-                             l -> !l.isEmpty(),
-                             __ -> idempotencyKeyDao.findWhereCreationDateBefore(before, 20))
-                     .flatMap(List::stream);
+    public void cleanupIdempotencyKey(String idempotencyKey) {
+        idempotencyKeyDao.deleteById(idempotencyKey);
     }
-
-
-    @Override
-    public void delete(String key) {
-        idempotencyKeyDao.deleteById(key);
-    }
-
 
 }

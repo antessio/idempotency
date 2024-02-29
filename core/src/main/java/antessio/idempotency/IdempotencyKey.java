@@ -1,22 +1,19 @@
 package antessio.idempotency;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.Optional;
 
-public class IdempotencyKey <T>{
+public class IdempotencyKey {
     private String key;
-    private T target;
-    private Instant createdAt;
+    private String entityId;
+    private Instant expiresAt;
 
-    public IdempotencyKey(String key, T target) {
-        this.key = key;
-        this.target = target;
-    }
 
-    public IdempotencyKey(String key, T target, Instant createdAt) {
+    public IdempotencyKey(String key, String entityId, Instant expiresAt) {
         this.key = key;
-        this.target = target;
-        this.createdAt = createdAt;
+        this.entityId = entityId;
+        this.expiresAt = expiresAt;
     }
 
     public IdempotencyKey(String key) {
@@ -27,13 +24,49 @@ public class IdempotencyKey <T>{
         return key;
     }
 
-    public Optional<T> getTarget() {
-        return Optional.ofNullable(target);
+    public Optional<String> getEntityId() {
+        return Optional.ofNullable(entityId);
     }
 
+    public Instant getExpiresAt() {
+        return expiresAt;
+    }
 
-    public Instant getCreatedAt() {
-        return createdAt;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        IdempotencyKey that = (IdempotencyKey) o;
+
+        if (!Objects.equals(key, that.key)) {
+            return false;
+        }
+        if (!Objects.equals(entityId, that.entityId)) {
+            return false;
+        }
+        return Objects.equals(expiresAt, that.expiresAt);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = key != null ? key.hashCode() : 0;
+        result = 31 * result + (entityId != null ? entityId.hashCode() : 0);
+        result = 31 * result + (expiresAt != null ? expiresAt.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "IdempotencyKey{" +
+               "key='" + key + '\'' +
+               ", entityId='" + entityId + '\'' +
+               ", expiresAt=" + expiresAt +
+               '}';
     }
 
 }
